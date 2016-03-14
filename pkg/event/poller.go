@@ -25,9 +25,9 @@ type Poller struct {
 
 func NewPoller(url string, options ...PollOption) (*Poller, error) {
 	config := pollerConfig{
-		queueInterval:       10 * time.Second,
-		nowPlayingInterval:  1 * time.Second,
-		sessionDataInterval: 1 * time.Second,
+		queueInterval:       2 * time.Second,
+		nowPlayingInterval:  2 * time.Second,
+		sessionDataInterval: 5 * time.Second,
 	}
 
 	// Apply caller specified options

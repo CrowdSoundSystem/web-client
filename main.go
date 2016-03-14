@@ -3,6 +3,7 @@ package main
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"io"
 	"net/http"
 
@@ -64,9 +65,15 @@ func eventStreamHandler(ws *websocket.Conn) {
 	}
 }
 
+func handler(w http.ResponseWriter, req *http.Request) {
+	fmt.Fprintf(w, "Hello!")
+}
+
 func main() {
 	eventStream = event.NewStream("cs.ephyra.io:50051")
 
 	http.Handle("/event_stream", websocket.Handler(eventStreamHandler))
-	panic(http.ListenAndServe(":8080", http.FileServer(http.Dir("site/"))))
+	http.Handle("/", http.FileServer(http.Dir("site/")))
+
+	panic(http.ListenAndServe(":8080", nil))
 }

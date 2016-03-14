@@ -7,7 +7,7 @@
 
 function updateSessionInfo(info) {
     $("#stat-name").text(info.sessionName);
-    $("#stat-users").text(info.userCount);
+    $("#stat-users").text(info.users);
 }
 
 function updateVoteProgress(votesToSkip) {
@@ -19,7 +19,7 @@ function updateVoteProgress(votesToSkip) {
 }
 
 function updateNowPlaying(track) {
-    $("#np-title").text(track.title);
+    $("#np-title").text(track.name);
     $("#np-artist").text(track.artist);
     $("#np-genre").text(track.genre);
 }

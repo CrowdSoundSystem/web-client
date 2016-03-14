@@ -5,27 +5,52 @@
 // to keep all the data up to date.
 //
 
-$(document).read(function() {
-    if (!("Websocket" in window)) {
+$(document).ready(function() {
+    if (!window.WebSocket) {
         // TODO: Nicer transition.
         alert("Websockets not supported.");
     } else {
         // Setup conection and callback handlers.
+        connection = new WebSocket("ws://" + window.location.host + "/event_stream");
+        connection.onopen = onOpen
+        connection.onmessage = onMessage
+        connection.onerror = onError
+        connection.onclose = onClose
     }
 })
 
 function onOpen() {
     // TODO: Enable the screen, or something
+    console.log("Websocket connection open")
 }
 
 function onMessage(message) {
-    // TODO: Determine events and act accordingly
+    var eventData = JSON.parse(message.data);
+    if (eventData.error) {
+        console.log("unexpected stream error: " + eventData.error);
+        return
+    }
+
+    switch (eventData.eventType) {
+        case "queue":
+            updateUpNext(eventData.event.buffered)
+            updateDynamicQueue(eventData.event.queued)
+            break;
+        case "now_playing":
+            updateNowPlaying(eventData.event.song)
+            break;
+        case "session_data":
+            updateSessionInfo(eventData.event)
+            break;
+    }
 }
 
 function onError(err) {
     // TODO: Close the socket. This is important for chrome
+    connection.onClose()
 }
 
 function onClose() {
     // TODO: Disable the screen, or something
+    console.log("Websocket connection closed")
 }
