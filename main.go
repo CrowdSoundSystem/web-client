@@ -15,52 +15,19 @@ var (
 	eventStream *event.Stream
 )
 
-type EventData struct {
-	EventType string      `json:"eventType,omitempty"`
-	Error     error       `json:"error,omitempty"`
-	Event     interface{} `json:"event,omitempty"`
-}
-
 func eventStreamHandler(ws *websocket.Conn) {
 	defer ws.Close()
 
 	obs, err := eventStream.NewObserver()
 	if err != nil {
-		b, _ := json.Marshal(EventData{Error: err})
+		b, _ := json.Marshal(event.EventData{Error: err})
 		io.Copy(ws, bytes.NewReader(b))
 		return
 	}
 	defer obs.Close()
 
-	for {
-		var serialized []byte
-		select {
-		case event, ok := <-obs.QueueEvents():
-			if !ok {
-				return
-			}
-			serialized, _ = json.Marshal(EventData{
-				EventType: "queue",
-				Event:     event,
-			})
-		case event, ok := <-obs.NowPlayingEvents():
-			if !ok {
-				return
-			}
-			serialized, _ = json.Marshal(EventData{
-				EventType: "now_playing",
-				Event:     event,
-			})
-		case event, ok := <-obs.SessionDataEvents():
-			if !ok {
-				return
-			}
-			serialized, _ = json.Marshal(EventData{
-				EventType: "session_data",
-				Event:     event,
-			})
-		}
-
+	for event := range obs.Events() {
+		serialized, _ := json.Marshal(event)
 		io.Copy(ws, bytes.NewReader(serialized))
 	}
 }

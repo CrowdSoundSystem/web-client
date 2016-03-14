@@ -17,10 +17,8 @@ type Poller struct {
 	conn   *grpc.ClientConn
 	client crowdsound.CrowdSoundClient
 
-	shutdown             chan struct{}
-	queueEventChan       chan QueueEvent
-	nowPlayingEventChan  chan NowPlayingEvent
-	sessionDataEventChan chan SessionDataEvent
+	shutdown  chan struct{}
+	eventChan chan EventData
 }
 
 func NewPoller(url string, options ...PollOption) (*Poller, error) {
@@ -42,13 +40,11 @@ func NewPoller(url string, options ...PollOption) (*Poller, error) {
 	}
 
 	poller := &Poller{
-		config:               config,
-		conn:                 conn,
-		client:               crowdsound.NewCrowdSoundClient(conn),
-		shutdown:             make(chan struct{}),
-		queueEventChan:       make(chan QueueEvent),
-		nowPlayingEventChan:  make(chan NowPlayingEvent),
-		sessionDataEventChan: make(chan SessionDataEvent),
+		config:    config,
+		conn:      conn,
+		client:    crowdsound.NewCrowdSoundClient(conn),
+		shutdown:  make(chan struct{}),
+		eventChan: make(chan EventData),
 	}
 
 	go poller.pollQueue()
@@ -60,16 +56,10 @@ func NewPoller(url string, options ...PollOption) (*Poller, error) {
 
 func (p *Poller) Close() error {
 	close(p.shutdown)
-	close(p.queueEventChan)
-	close(p.nowPlayingEventChan)
-	close(p.sessionDataEventChan)
+	close(p.eventChan)
 
 	return p.conn.Close()
 }
-
-func (p *Poller) QueueEvents() <-chan QueueEvent             { return p.queueEventChan }
-func (p *Poller) NowPlayingEvents() <-chan NowPlayingEvent   { return p.nowPlayingEventChan }
-func (p *Poller) SessionDataEvents() <-chan SessionDataEvent { return p.sessionDataEventChan }
 
 func (p *Poller) pollQueue() {
 	for {
@@ -83,7 +73,7 @@ func (p *Poller) pollQueue() {
 				continue
 			}
 
-			var event QueueEvent
+			event := &QueueEvent{}
 
 			for {
 				resp, err := stream.Recv()
@@ -107,7 +97,10 @@ func (p *Poller) pollQueue() {
 				}
 			}
 
-			p.queueEventChan <- event
+			p.eventChan <- EventData{
+				EventType: "queue",
+				Event:     event,
+			}
 		}
 	}
 }
@@ -124,8 +117,11 @@ func (p *Poller) pollNowPlaying() {
 				continue
 			}
 
-			p.nowPlayingEventChan <- NowPlayingEvent{
-				Song: Song{Name: resp.Name, Artist: resp.Artist, Genre: resp.Genre},
+			p.eventChan <- EventData{
+				EventType: "now_playing",
+				Event: &NowPlayingEvent{
+					Song: Song{Name: resp.Name, Artist: resp.Artist, Genre: resp.Genre},
+				},
 			}
 		}
 	}
@@ -143,9 +139,12 @@ func (p *Poller) pollSessionData() {
 				continue
 			}
 
-			p.sessionDataEventChan <- SessionDataEvent{
-				SessionName: resp.SessionName,
-				Users:       int(resp.NumUsers),
+			p.eventChan <- EventData{
+				EventType: "sesssion_data",
+				Event: &SessionDataEvent{
+					SessionName: resp.SessionName,
+					Users:       int(resp.NumUsers),
+				},
 			}
 		}
 	}

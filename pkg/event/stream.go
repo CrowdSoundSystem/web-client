@@ -7,9 +7,7 @@ type Stream struct {
 	pollOpts []PollOption
 	poller   *Poller
 
-	lastQueueEvent       *QueueEvent
-	lastNowPlayingEvent  *NowPlayingEvent
-	lastSessionDataEvent *SessionDataEvent
+	lastEvents map[string]EventData
 
 	mu             sync.Mutex
 	nextObserverID int
@@ -18,53 +16,27 @@ type Stream struct {
 
 func NewStream(url string, pollOpts ...PollOption) *Stream {
 	return &Stream{
-		url:       url,
-		pollOpts:  pollOpts,
-		observers: make(map[int]*StreamObserver),
+		url:        url,
+		pollOpts:   pollOpts,
+		lastEvents: make(map[string]EventData),
+		observers:  make(map[int]*StreamObserver),
 	}
 }
 
 func (s *Stream) monitor() {
 	for {
 		select {
-		case event, ok := <-s.poller.QueueEvents():
+		case event, ok := <-s.poller.eventChan:
 			if !ok {
 				return
 			}
 
 			s.mu.Lock()
-			s.lastQueueEvent = &event
-			for _, obs := range s.observers {
-				select {
-				case obs.queueEvents <- event:
-				default:
-				}
-			}
-			s.mu.Unlock()
-		case event, ok := <-s.poller.NowPlayingEvents():
-			if !ok {
-				return
-			}
 
-			s.mu.Lock()
-			s.lastNowPlayingEvent = &event
+			s.lastEvents[event.EventType] = event
 			for _, obs := range s.observers {
 				select {
-				case obs.nowPlayingEvents <- event:
-				default:
-				}
-			}
-			s.mu.Unlock()
-		case event, ok := <-s.poller.SessionDataEvents():
-			if !ok {
-				return
-			}
-
-			s.mu.Lock()
-			s.lastSessionDataEvent = &event
-			for _, obs := range s.observers {
-				select {
-				case obs.sessionDataEvents <- event:
+				case obs.eventsChan <- event:
 				default:
 				}
 			}
@@ -75,10 +47,7 @@ func (s *Stream) monitor() {
 
 func (s *Stream) NewObserver() (*StreamObserver, error) {
 	obs := &StreamObserver{
-		stream:            s,
-		queueEvents:       make(chan QueueEvent, 1),
-		nowPlayingEvents:  make(chan NowPlayingEvent, 1),
-		sessionDataEvents: make(chan SessionDataEvent, 1),
+		stream: s,
 	}
 
 	s.mu.Lock()
@@ -101,15 +70,9 @@ func (s *Stream) NewObserver() (*StreamObserver, error) {
 	s.observers[obs.observerID] = obs
 	s.nextObserverID++
 
-	// If there is any data, prepopulate the channel
-	if s.lastQueueEvent != nil {
-		obs.queueEvents <- *s.lastQueueEvent
-	}
-	if s.lastNowPlayingEvent != nil {
-		obs.nowPlayingEvents <- *s.lastNowPlayingEvent
-	}
-	if s.lastQueueEvent != nil {
-		obs.sessionDataEvents <- *s.lastSessionDataEvent
+	obs.eventsChan = make(chan EventData, len(s.lastEvents))
+	for _, event := range s.lastEvents {
+		obs.eventsChan <- event
 	}
 
 	return obs, nil
@@ -118,15 +81,11 @@ func (s *Stream) NewObserver() (*StreamObserver, error) {
 type StreamObserver struct {
 	stream *Stream
 
-	observerID        int
-	queueEvents       chan QueueEvent
-	nowPlayingEvents  chan NowPlayingEvent
-	sessionDataEvents chan SessionDataEvent
+	observerID int
+	eventsChan chan EventData
 }
 
-func (s *StreamObserver) QueueEvents() <-chan QueueEvent             { return s.queueEvents }
-func (s *StreamObserver) NowPlayingEvents() <-chan NowPlayingEvent   { return s.nowPlayingEvents }
-func (s *StreamObserver) SessionDataEvents() <-chan SessionDataEvent { return s.sessionDataEvents }
+func (s *StreamObserver) Events() <-chan EventData { return s.eventsChan }
 
 func (s *StreamObserver) Close() error {
 	s.stream.mu.Lock()
@@ -139,9 +98,7 @@ func (s *StreamObserver) Close() error {
 	}
 
 	delete(s.stream.observers, s.observerID)
-	close(s.queueEvents)
-	close(s.nowPlayingEvents)
-	close(s.sessionDataEvents)
+	close(s.eventsChan)
 
 	return nil
 }
