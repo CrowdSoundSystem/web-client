@@ -14,7 +14,7 @@ import (
 
 type Poller struct {
 	config pollerConfig
-	conn   grpc.Conn
+	conn   *grpc.ClientConn
 	client crowdsound.CrowdSoundClient
 
 	shutdown             chan struct{}
@@ -32,7 +32,7 @@ func NewPoller(url string, options ...PollOption) (*Poller, error) {
 
 	// Apply caller specified options
 	for _, opt := range options {
-		opt(config)
+		opt(&config)
 	}
 
 	// Create gRPC connection to crowdsound.
@@ -64,7 +64,7 @@ func (p *Poller) Close() error {
 	close(p.nowPlayingEventChan)
 	close(p.sessionDataEventChan)
 
-	return conn.Close()
+	return p.conn.Close()
 }
 
 func (p *Poller) QueueEvents() <-chan QueueEvent             { return p.queueEventChan }
@@ -77,24 +77,21 @@ func (p *Poller) pollQueue() {
 		case <-p.shutdown:
 			return
 		case <-time.After(p.config.queueInterval):
-			stream, err := p.client.GetQueue(context.Background())
+			stream, err := p.client.GetQueue(context.Background(), &crowdsound.GetQueueRequest{})
 			if err != nil {
 				log.Println("Unable to retreive now playing:", err)
 				continue
 			}
 
-			event := QueueEvent{
-				Buffered:   make([]Song),
-				QueueEvent: make([]Song),
-			}
+			var event QueueEvent
 
 			for {
 				resp, err := stream.Recv()
 				if err == io.EOF {
-					continue
+					break
 				} else if err != nil {
 					log.Println("Unexpected error streaming getQueue:", err)
-					continue
+					break
 				}
 
 				song := Song{
@@ -110,7 +107,7 @@ func (p *Poller) pollQueue() {
 				}
 			}
 
-			p.QueueEvents <- event
+			p.queueEventChan <- event
 		}
 	}
 }
@@ -121,7 +118,7 @@ func (p *Poller) pollNowPlaying() {
 		case <-p.shutdown:
 			return
 		case <-time.After(p.config.nowPlayingInterval):
-			resp, err := p.client.GetPlaying(context.Background())
+			resp, err := p.client.GetPlaying(context.Background(), &crowdsound.GetPlayingRequest{})
 			if err != nil {
 				log.Println("Unable to retreive now playing:", err)
 				continue
@@ -140,7 +137,7 @@ func (p *Poller) pollSessionData() {
 		case <-p.shutdown:
 			return
 		case <-time.After(p.config.sessionDataInterval):
-			resp, err := p.client.GetSessionData(context.Background())
+			resp, err := p.client.GetSessionData(context.Background(), &crowdsound.GetSessionDataRequest{})
 			if err != nil {
 				log.Println("Unable to retrieve session data:", err)
 				continue
@@ -148,7 +145,7 @@ func (p *Poller) pollSessionData() {
 
 			p.sessionDataEventChan <- SessionDataEvent{
 				SessionName: resp.SessionName,
-				Users:       resp.NumUsers,
+				Users:       int(resp.NumUsers),
 			}
 		}
 	}
