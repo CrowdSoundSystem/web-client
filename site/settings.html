@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+        <title>Crowdsound</title>
+
+        <!-- Bootstrap -->
+        <link href="css/bootstrap.min.css" rel="stylesheet">
+        <link href="css/bootstrap-theme-slate.min.css" rel="stylesheet">
+
+        <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+        <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+        <!--[if lt IE 9]>
+          <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+          <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+        <![endif]-->
+    </head>
+    <body>
+        <!-- Top Navbar -->
+        <nav class="navbar">
+            <div class="container-fluid">
+                <div class="navbar-header">
+                    <a class="navbar-brand" href="#">Crowdsound</a>
+                </div>
+
+                <div id="navbar">
+                    <ul class="nav navbar-nav navbar-right">
+                        <li class=""><a href="index.html">Dashboard</a></li>
+                        <li class="active"><a href="#">Settings</a></li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+
+
+        <div class="container">
+            <div class="row">
+                <div class="col-md-3">
+                    <div class="panel panel-success">
+                        <div class="panel-heading">Version Info</div>
+                        <ul class="list-group">
+                            <li class="list-group-item"><strong>Crowdsound:</strong> <span id="stat-name">815f820</span></li>
+                            <li class="list-group-item"><strong>Playsource:</strong> <span id="stat-users">815f820</span></li>
+                            <li class="list-group-item"><strong>Algorithm:</strong> <span id="stat-users">815f820</span></li>
+                            <li class="list-group-item"><strong>Skrillex:</strong> <span id="stat-users">815f820</span></li>
+                            <li class="list-group-item"><strong>gRPC:</strong> <span id="stat-users">0.11-1</span></li>
+                        </ul>
+                    </div>
+                    <div class="panel panel-primary">
+                        <div class="panel-heading">DB Stats</div>
+                        <ul id="trending-artists" class="list-group">
+                            <li class="list-group-item"><strong>Songs:</strong> <span id="stat-users">1000</span></li>
+                            <li class="list-group-item"><strong>Artists:</strong> <span id="stat-users">100</span></li>
+                            <li class="list-group-item"><strong>Genres:</strong> <span id="stat-users">10</span></li>
+                        </ul>
+                    </div>
+                    <div class="panel panel-primary">
+                        <div class="panel-heading">User Stats</div>
+                        <ul id="trending-artists" class="list-group">
+                            <li class="list-group-item"><strong>Current Users:</strong> <span id="stat-users">1000</span></li>
+                            <li class="list-group-item"><strong>Total Users:</strong> <span id="stat-users">100</span></li>
+                        </ul>
+                    </div>
+
+                </div>
+                <div class="col-md-9">
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            <h3 class="panel-title">DB Settings</h3>
+                        </div>
+
+                        <ul id="buffered-queue" class="list-group">
+                            <!-- TODO: Generate these -->
+                            <li class="list-group-item">
+                                Filter Buffered
+                                <div style="float: right;">
+                                    <a id="filterBuffered" href="#" data-toggle="modal" data-target="#settingsModal">Loading...</a>
+                                </div>
+                            </li>
+                            <li class="list-group-item">
+                                Inactivity Threshold
+                                <div style="float: right;">
+                                    <a id="inactivityThreshold" href="#" data-toggle="modal" data-target="#settingsModal">Loading...</a>
+                                </div>
+                            </li>
+                            <li class="list-group-item">
+                                Result Limit
+                                <div style="float: right;">
+                                    <a id="resultLimit" href="#" data-toggle="modal" data-target="#settingsModal">Loading...</a>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            <h3 class="panel-title">Queue Settings</h3>
+                        </div>
+
+                        <ul id="buffered-queue" class="list-group">
+                            <!-- TODO: Generate these -->
+                            <li class="list-group-item">
+                                Session Name
+                                <div style="float: right;">
+                                    <a id="session-name" href="#" data-toggle="modal" data-target="#settingsModal">Loading...</a>
+                                </div>
+                            </li>
+                            <li class="list-group-item">
+                                Queue Size
+                                <div style="float: right;">
+                                    <a id="queueSize" href="#" data-toggle="modal" data-target="#settingsModal">Loading...</a>
+                                </div>
+                            </li>
+                            <li class="list-group-item">
+                                Trending Artists Size
+                                <div style="float: right;">
+                                    <a id="trendingArtistsSize" href="#" data-toggle="modal" data-target="#settingsModal">Loading...</a>
+                                </div>
+                            </li>
+                            <li class="list-group-item">
+                                Skip Threshold
+                                <div style="float: right;">
+                                    <a id="skipThreshold" href="#" data-toggle="modal" data-target="#settingsModal">Loading...</a>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            <h3 class="panel-title">Algorithm Settings</h3>
+                        </div>
+
+                        <ul id="buffered-queue" class="list-group">
+                            <!-- TODO: Generate these -->
+                            <li class="list-group-item">
+                                Count Weight
+                                <div style="float: right;">
+                                    <a id="countWeight" href="#" data-toggle="modal" data-target="#settingsModal">Loading...</a>
+                                </div>
+                            </li>
+                            <li class="list-group-item">
+                                Vote Weight
+                                <div style="float: right;">
+                                    <a id="voteWeight" href="#" data-toggle="modal" data-target="#settingsModal">Loading...</a>
+                                </div>
+                            </li>
+                            <li class="list-group-item">
+                                Genre Weight
+                                <div style="float: right;">
+                                    <a id="genreWeight" href="#" data-toggle="modal" data-target="#settingsModal">Loading...</a>
+                                </div>
+                            </li>
+                            <li class="list-group-item">
+                                Artist Weight
+                                <div style="float: right;">
+                                    <a id="artistWeight" href="#" data-toggle="modal" data-target="#settingsModal">Loading...</a>
+                                </div>
+                            </li>
+                            <li class="list-group-item">
+                                Played Again Multiplier
+                                <div style="float: right;">
+                                    <a id="playedAgainMult" href="#" data-toggle="modal" data-target="#settingsModal">Loading...</a>
+                                </div>
+                            </li>
+                            <li class="list-group-item">
+                                Minimum Repeat Window
+                                <div style="float: right;">
+                                    <a id="minRepeatWindow" href="#" data-toggle="modal" data-target="#settingsModal">Loading...</a>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal Template -->
+        <div id="settingsModal" class="modal fade" role="dialog">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                        <h4 id="settings-title" class="modal-title">Settings</h4>
+                    </div>
+                    <div id="settings-body" class="modal-body">
+                    </div>
+                    <div class="modal-footer">
+                        <button id="btn-save" type="button" class="btn btn-success">Save</button>
+                        <button id="btn-cancel" type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Text Value Template -->
+        <div id="form-text" class="form-group" style="display: none;">
+            <label class="control-label" for="text-input">Text</label>
+            <input id="text-input" class="form-control value" type="text" required>
+        </div>
+
+        <!-- Boolean Value Template -->
+        <div id="form-boolean" class="form-group" style="display: none;">
+            <input id="boolean-input" class="value bool" type="checkbox">
+            <label class="control-label" for="boolean-input">Text</label>
+            </label>
+        </div>
+
+        <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+        <script src="js/lib/jquery-1.12.1.min.js"></script>
+        <!-- Include all compiled plugins (below), or include individual files as needed -->
+        <script src="js/lib/bootstrap.min.js"></script>
+        <script src="js/settings.js"></script>
+    </body>
+</html>

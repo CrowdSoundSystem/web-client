@@ -54,12 +54,16 @@ func skipHandler(w http.ResponseWriter, req *http.Request) {
 	}
 }
 
+func settingHandler(w http.ResponseWriter, req *http.Request) {
+}
+
 func main() {
 	flag.Parse()
 
 	eventStream = event.NewStream(*endpoint)
 
 	http.HandleFunc("/admin/skip", skipHandler)
+	http.HandleFunc("/admin/setting", settingHandler)
 	http.Handle("/event_stream", websocket.Handler(eventStreamHandler))
 	http.Handle("/", http.FileServer(http.Dir("site/")))
 

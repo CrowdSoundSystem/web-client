@@ -10,13 +10,15 @@ function updateSessionInfo(info) {
     $("#stat-users").text(info.users);
 }
 
-function updateSkipStatus(voteCount, totalUsers) {
-    // This works. Javascript!
-    var percentage = 0.0;
-    if (totalUsers > 0) {
-        percentage = (voteCount / totalUsers) * 100;
-    }
+function updateSkipStatus(info) {
+    // Since votes-to-skip is relative to the threshold, we need to re-adjust.
+    // An additional thing to note, is that to skip, it needs to *exceed* the
+    // threshold. For example, a 50% threshold requires half of votes. However,
+    // 1/2 people is _not_ sufficient, and so the progress bar should not be
+    // shown at 100%
 
+    var required = Math.floor(info.threshold * info.total_users) + 1;
+    var percentage = (info.vote_to_skip / required) * 100;
     $("#skip-status-progress").width(percentage + '%')
 }
 

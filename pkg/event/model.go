@@ -31,6 +31,7 @@ type TrendingArtistsEvent struct {
 }
 
 type SkipStatusEvent struct {
-	VotesToSkip int `json:"vote_to_skip"`
-	TotalUsers  int `json:"total_users"`
+	VotesToSkip int     `json:"vote_to_skip"`
+	TotalUsers  int     `json:"total_users"`
+	Threshold   float32 `json:"threshold"`
 }

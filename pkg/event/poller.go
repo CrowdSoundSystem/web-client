@@ -207,6 +207,7 @@ func (p *Poller) pollSkipStatus() {
 				Event: &SkipStatusEvent{
 					VotesToSkip: int(resp.VotesToSkip),
 					TotalUsers:  int(resp.TotalUsers),
+					Threshold:   resp.Threshold,
 				},
 			}
 		}

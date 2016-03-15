@@ -28,7 +28,7 @@ function onMessage(message) {
     var eventData = JSON.parse(message.data);
     if (eventData.error) {
         console.log("unexpected stream error: " + eventData.error);
-        return
+        return;
     }
 
     switch (eventData.eventType) {
@@ -46,7 +46,7 @@ function onMessage(message) {
             updateTopArtists(eventData.event.artists);
             break;
         case "skip_status":
-            updateSkipStatus(eventData.event.vote_to_skip, eventData.event.total_users);
+            updateSkipStatus(eventData.event);
     }
 }
 
