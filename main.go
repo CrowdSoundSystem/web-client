@@ -122,6 +122,42 @@ func settingHandler(w http.ResponseWriter, req *http.Request) {
 	}
 }
 
+func versionHandler(w http.ResponseWriter, req *http.Request) {
+	conn, err := grpc.Dial(*endpoint, grpc.WithInsecure(), grpc.WithTimeout(10*time.Second))
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	client := crowdsound.NewAdminClient(conn)
+	resp, err := client.GetVersionInfo(context.Background(), &crowdsound.GetVersionInfoRequest{})
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	serialized, _ := json.Marshal(resp)
+	io.Copy(w, bytes.NewReader(serialized))
+}
+
+func dbStatsHandler(w http.ResponseWriter, req *http.Request) {
+	conn, err := grpc.Dial(*endpoint, grpc.WithInsecure(), grpc.WithTimeout(10*time.Second))
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	client := crowdsound.NewAdminClient(conn)
+	resp, err := client.GetDBStats(context.Background(), &crowdsound.GetDBStatsRequest{})
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	serialized, _ := json.Marshal(resp)
+	io.Copy(w, bytes.NewReader(serialized))
+}
+
 func main() {
 	flag.Parse()
 
@@ -134,6 +170,8 @@ func main() {
 
 	http.HandleFunc("/admin/skip", skipHandler)
 	http.HandleFunc("/admin/setting", settingHandler)
+	http.HandleFunc("/admin/version", versionHandler)
+	http.HandleFunc("/admin/db_stats", dbStatsHandler)
 	http.Handle("/event_stream", websocket.Handler(eventStreamHandler))
 	http.Handle("/", http.FileServer(http.Dir("site/")))
 

@@ -34,6 +34,10 @@ It has these top-level messages:
 	GetSettingsResponse
 	SetSettingRequest
 	SetSettingResponse
+	GetVersionInfoRequest
+	GetVersionInfoResponse
+	GetDBStatsRequest
+	GetDBStatsResponse
 */
 package crowdsound
 

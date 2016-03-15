@@ -13,12 +13,51 @@ formCallback = null;
 formElement = null;
 
 $(document).ready(function() {
+    updateVersionInfo();
+    updateDBStats();
+    updateSettings();
+});
+
+function updateVersionInfo() {
+    $.ajax({
+        url:    "admin/version",
+        method: "GET",
+        success: function(response) {
+            var info = JSON.parse(response);
+            $.each(info, function(key, val) {
+                $("#" + key).text(val);
+            });
+        },
+        error: function(result) {
+            // TODO: Could do a badge, but fuck it, more things to do
+            alert("Error retrieving version info.");
+        }
+    });
+}
+
+function updateDBStats() {
+    $.ajax({
+        url:    "admin/db_stats",
+        method: "GET",
+        success: function(response) {
+            var stats = JSON.parse(response);
+            $.each(stats, function(key, val) {
+                $("#" + key).text(val);
+            });
+        },
+        error: function(result) {
+            // TODO: Could do a badge, but fuck it, more things to do
+            alert("Error retrieving version info.");
+        }
+    });
+}
+
+function updateSettings() {
     $.ajax({
         url:    "admin/setting",
         method: "GET",
         success: function(response) {
-            settings = JSON.parse(response);
-            console.log("settings:", settings);
+            var settings = JSON.parse(response);
             $.each(settings, function(key, val) {
                 // For most things, we can just set it literally.
                 // For others, we need to do some stuff first
@@ -59,7 +98,8 @@ $(document).ready(function() {
             alert("Error retrieving settings.");
         }
     });
-});
+};
+
 
 function createModal(title, form, callback) {
     $("#settings-title").val(title);
