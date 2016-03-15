@@ -227,7 +227,7 @@ $("#session_name").click(function() {
 
 $("#queue_size").click(function() {
     createModal("Queue Size", createTextForm("Queue Size", integerPattern, $("#queue_size").text()), function(val) {
-        postSetting("queue_size", "int", queue_size);
+        postSetting("queue_size", "int", val);
         $("#queue_size").text(val);
     });
 });
