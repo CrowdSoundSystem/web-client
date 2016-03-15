@@ -30,6 +30,10 @@ It has these top-level messages:
 	SkipStatusResponse
 	SkipRequest
 	SkipResponse
+	GetSettingsRequest
+	GetSettingsResponse
+	SetSettingRequest
+	SetSettingResponse
 */
 package crowdsound
 

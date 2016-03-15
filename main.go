@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"flag"
 	"io"
+	"log"
 	"net/http"
 	"time"
 
@@ -12,12 +13,14 @@ import (
 
 	"github.com/crowdsoundsystem/web-client/pkg/crowdsound"
 	"github.com/crowdsoundsystem/web-client/pkg/event"
+	"github.com/crowdsoundsystem/web-client/pkg/settings"
 	"golang.org/x/net/context"
 	"golang.org/x/net/websocket"
 )
 
 var (
-	eventStream *event.Stream
+	eventStream    *event.Stream
+	remoteSettings *settings.Settings
 
 	endpoint = flag.String("endpoint", "localhost:50051", "Crowdsound endpoint")
 )
@@ -55,12 +58,27 @@ func skipHandler(w http.ResponseWriter, req *http.Request) {
 }
 
 func settingHandler(w http.ResponseWriter, req *http.Request) {
+	if req.Method == "GET" {
+		s, err := remoteSettings.Get(false)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		serialized, _ := json.Marshal(s)
+		io.Copy(w, bytes.NewReader(serialized))
+	}
 }
 
 func main() {
 	flag.Parse()
 
+	var err error
 	eventStream = event.NewStream(*endpoint)
+	remoteSettings, err = settings.NewSettings(*endpoint, 10*time.Second)
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	http.HandleFunc("/admin/skip", skipHandler)
 	http.HandleFunc("/admin/setting", settingHandler)
