@@ -240,7 +240,8 @@ $("#trending_artists_size").click(function() {
 });
 
 $("#skip_threshold").click(function() {
-    createModal("Skip Threshold", createTextForm("Skip Threshold [0, 100]", percentagePattern, $("#skip_threshold").text()), function(val) {
+    var initial = $("#skip_threshold").text().split("%")[0]
+    createModal("Skip Threshold", createTextForm("Skip Threshold [0, 100]", percentagePattern, initial), function(val) {
         postSetting("skip_threshold", "float", val/100.0);
         $("#skip_threshold").text(val + "%");
     });
