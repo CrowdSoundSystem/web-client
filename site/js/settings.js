@@ -31,10 +31,23 @@ $(document).ready(function() {
                         }
                         break;
                     case "inactivity_threshold":
-                        val = val + " minute(s)";
+                        val = val / 60 / 1000 + " minute(s)";
                         break;
                     case "skip_threshold":
                         val = 100 * val + "%";
+                        break;
+                    case "vote_weight":
+                        switch (val) {
+                            case 0:
+                                val = "Low";
+                                break;
+                            case 1:
+                                val = "Equal";
+                                break;
+                            case 2:
+                                val = "High";
+                                break;
+                        }
                         break;
                 }
 
@@ -101,6 +114,8 @@ $("#btn-save").click(function() {
 
     if (formElement.find(".bool").length > 0) {
         value = formElement.find(".bool").is(":checked");
+    } else if (formElement.find(":checked").length > 0) {
+        value = formElement.find(":checked").val();
     } else {
         value = formElement.find(".value").val();
     }
@@ -198,8 +213,31 @@ $("#count_weight").click(function() {
 });
 
 $("#vote_weight").click(function() {
-    createModal("Vote Weight", createTextForm("Vote Weight", multiplierPattern, $("#vote_weight").text()), function(val) {
+    var form = $("#form-vote-weight").clone();
+    switch ($("#vote_weight").text()) {
+        case "Low":
+            form.find("#optLow").prop("checked", true);
+            break;
+        case "Equal":
+            form.find("#optEqual").prop("checked", true);
+            break;
+        case "Low":
+            form.find("#optHigh").prop("checked", true);
+            break;
+    }
+    createModal("Vote Weight", form, function(val) {
         postSetting("vote_weight", "int", val);
+        switch (val) {
+            case "0":
+                val = "Low";
+                break;
+            case "1":
+                val = "Equal";
+                break;
+            case "2":
+                val = "High";
+                break;
+        }
         $("#vote_weight").text(val);
     });
 });

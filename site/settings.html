@@ -135,7 +135,6 @@
                         </div>
 
                         <ul id="buffered-queue" class="list-group">
-                            <!-- TODO: Generate these -->
                             <li class="list-group-item">
                                 Count Weight
                                 <div style="float: right;">
@@ -145,7 +144,7 @@
                             <li class="list-group-item">
                                 Vote Weight
                                 <div style="float: right;">
-                                    <a id="vote_weight" href="#" data-toggle="modal" data-target="#settingsModal">Equal</a>
+                                    <a id="vote_weight" href="#" data-toggle="modal" data-target="#settingsModal">Low</a>
                                 </div>
                             </li>
                             <li class="list-group-item">
@@ -208,6 +207,20 @@
             <input id="boolean-input" class="value bool" type="checkbox">
             <label class="control-label" for="boolean-input">Text</label>
             </label>
+        </div>
+
+        <!-- Vote Weight Form -->
+        <div id="form-vote-weight" class="form-group" style="display: none;">
+            <label class="control-label" for="text-input">Vote Weight</label>
+            <div class="radio">
+                <label><input id="optLow" name="vote-weight" type="radio" value="0">Low</label>
+            </div>
+            <div class="radio">
+                <label><input id="optEqual" name="vote-weight" type="radio" value="1">Equal</label>
+            </div>
+            <div class="radio">
+                <label><input id="optHigh" name="vote-weight" type="radio" value="2">High</label>
+            </div>
         </div>
 
         <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
