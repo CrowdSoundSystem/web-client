@@ -23,7 +23,8 @@ var (
 	eventStream    *event.Stream
 	remoteSettings *settings.Settings
 
-	endpoint = flag.String("endpoint", "localhost:50051", "Crowdsound endpoint")
+	listenAddr = flag.String("listen", ":8080", "Listen address")
+	endpoint   = flag.String("endpoint", "localhost:50051", "Crowdsound endpoint")
 )
 
 func eventStreamHandler(ws *websocket.Conn) {
@@ -175,5 +176,5 @@ func main() {
 	http.Handle("/event_stream", websocket.Handler(eventStreamHandler))
 	http.Handle("/", http.FileServer(http.Dir("site/")))
 
-	panic(http.ListenAndServe(":8080", nil))
+	panic(http.ListenAndServe(*listenAddr, nil))
 }
