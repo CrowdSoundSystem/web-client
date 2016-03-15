@@ -72,6 +72,10 @@ function updateSettings() {
                     case "inactivity_threshold":
                         val = val / 60 / 1000 + " minute(s)";
                         break;
+                    case "min_repeat_window":
+                        val = val + " minute(s)";
+                        break;
+
                     case "skip_threshold":
                         val = 100 * val + "%";
                         break;
