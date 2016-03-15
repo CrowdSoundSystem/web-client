@@ -33,17 +33,20 @@ function onMessage(message) {
 
     switch (eventData.eventType) {
         case "queue":
-            updateUpNext(eventData.event.buffered)
-            updateDynamicQueue(eventData.event.queued)
+            updateUpNext(eventData.event.buffered);
+            updateDynamicQueue(eventData.event.queued);
             break;
         case "now_playing":
-            updateNowPlaying(eventData.event.song)
+            updateNowPlaying(eventData.event.song);
             break;
         case "session_data":
-            updateSessionInfo(eventData.event)
+            updateSessionInfo(eventData.event);
             break;
         case "trending_artists":
-            updateTopArtists(eventData.event.artists)
+            updateTopArtists(eventData.event.artists);
+            break;
+        case "skip_status":
+            updateSkipStatus(eventData.event.vote_to_skip, eventData.event.total_users);
     }
 }
 
@@ -56,3 +59,16 @@ function onClose() {
     // TODO: Disable the screen, or something
     console.log("Websocket connection closed")
 }
+
+$("#btn-force-skip").click(function() {
+    $("#btn-force-skip").addClass("disabled");
+    $.ajax({
+        url:    "admin/skip",
+        error: function(xhr, status, error) {
+            alert("Could not skip: " + error);
+        },
+        complete: function(xhr, status) {
+            $("#btn-force-skip").removeClass("disabled");
+        }
+    });
+});

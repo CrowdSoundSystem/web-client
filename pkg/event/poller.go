@@ -9,13 +9,14 @@ import (
 
 	"google.golang.org/grpc"
 
-	"github.com/crowdsoundsystem/go-client/pkg/crowdsound"
+	"github.com/crowdsoundsystem/web-client/pkg/crowdsound"
 )
 
 type Poller struct {
-	config pollerConfig
-	conn   *grpc.ClientConn
-	client crowdsound.CrowdSoundClient
+	config           pollerConfig
+	conn             *grpc.ClientConn
+	crowdsoundClient crowdsound.CrowdSoundClient
+	adminClient      crowdsound.AdminClient
 
 	shutdown  chan struct{}
 	eventChan chan EventData
@@ -25,8 +26,9 @@ func NewPoller(url string, options ...PollOption) (*Poller, error) {
 	config := pollerConfig{
 		queueInterval:           2 * time.Second,
 		nowPlayingInterval:      2 * time.Second,
-		sessionDataInterval:     5 * time.Second,
-		trendingArtistsInterval: 5 * time.Second,
+		sessionDataInterval:     2 * time.Second,
+		trendingArtistsInterval: 2 * time.Second,
+		skipStatusInterval:      1 * time.Second,
 	}
 
 	// Apply caller specified options
@@ -41,17 +43,19 @@ func NewPoller(url string, options ...PollOption) (*Poller, error) {
 	}
 
 	poller := &Poller{
-		config:    config,
-		conn:      conn,
-		client:    crowdsound.NewCrowdSoundClient(conn),
-		shutdown:  make(chan struct{}),
-		eventChan: make(chan EventData),
+		config:           config,
+		conn:             conn,
+		crowdsoundClient: crowdsound.NewCrowdSoundClient(conn),
+		adminClient:      crowdsound.NewAdminClient(conn),
+		shutdown:         make(chan struct{}),
+		eventChan:        make(chan EventData),
 	}
 
 	go poller.pollQueue()
 	go poller.pollNowPlaying()
 	go poller.pollSessionData()
 	go poller.pollTrendingArtists()
+	go poller.pollSkipStatus()
 
 	return poller, nil
 }
@@ -69,7 +73,7 @@ func (p *Poller) pollQueue() {
 		case <-p.shutdown:
 			return
 		case <-time.After(p.config.queueInterval):
-			stream, err := p.client.GetQueue(context.Background(), &crowdsound.GetQueueRequest{})
+			stream, err := p.crowdsoundClient.GetQueue(context.Background(), &crowdsound.GetQueueRequest{})
 			if err != nil {
 				log.Println("Unable to retreive now playing:", err)
 				continue
@@ -113,7 +117,7 @@ func (p *Poller) pollNowPlaying() {
 		case <-p.shutdown:
 			return
 		case <-time.After(p.config.nowPlayingInterval):
-			resp, err := p.client.GetPlaying(context.Background(), &crowdsound.GetPlayingRequest{})
+			resp, err := p.crowdsoundClient.GetPlaying(context.Background(), &crowdsound.GetPlayingRequest{})
 			if err != nil {
 				log.Println("Unable to retreive now playing:", err)
 				continue
@@ -135,7 +139,7 @@ func (p *Poller) pollSessionData() {
 		case <-p.shutdown:
 			return
 		case <-time.After(p.config.sessionDataInterval):
-			resp, err := p.client.GetSessionData(context.Background(), &crowdsound.GetSessionDataRequest{})
+			resp, err := p.crowdsoundClient.GetSessionData(context.Background(), &crowdsound.GetSessionDataRequest{})
 			if err != nil {
 				log.Println("Unable to retrieve session data:", err)
 				continue
@@ -158,7 +162,7 @@ func (p *Poller) pollTrendingArtists() {
 		case <-p.shutdown:
 			return
 		case <-time.After(p.config.trendingArtistsInterval):
-			stream, err := p.client.ListTrendingArtists(context.Background(), &crowdsound.ListTrendingArtistsRequest{})
+			stream, err := p.crowdsoundClient.ListTrendingArtists(context.Background(), &crowdsound.ListTrendingArtistsRequest{})
 			if err != nil {
 				log.Println("Unable to retrieve trending artists:", err)
 				continue
@@ -181,6 +185,29 @@ func (p *Poller) pollTrendingArtists() {
 			p.eventChan <- EventData{
 				EventType: "trending_artists",
 				Event:     event,
+			}
+		}
+	}
+}
+
+func (p *Poller) pollSkipStatus() {
+	for {
+		select {
+		case <-p.shutdown:
+			return
+		case <-time.After(p.config.skipStatusInterval):
+			resp, err := p.adminClient.SkipStatus(context.Background(), &crowdsound.SkipStatusRequest{})
+			if err != nil {
+				log.Println("Unable to retrieve skip status:, err")
+				continue
+			}
+
+			p.eventChan <- EventData{
+				EventType: "skip_status",
+				Event: &SkipStatusEvent{
+					VotesToSkip: int(resp.VotesToSkip),
+					TotalUsers:  int(resp.TotalUsers),
+				},
 			}
 		}
 	}

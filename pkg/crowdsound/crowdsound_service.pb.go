@@ -7,6 +7,7 @@ Package crowdsound is a generated protocol buffer package.
 
 It is generated from these files:
 	pkg/crowdsound/crowdsound_service.proto
+	pkg/crowdsound/crowdsound_admin_service.proto
 
 It has these top-level messages:
 	PingRequest
@@ -25,6 +26,10 @@ It has these top-level messages:
 	VoteSongResponse
 	VoteSkipRequest
 	VoteSkipResponse
+	SkipStatusRequest
+	SkipStatusResponse
+	SkipRequest
+	SkipResponse
 */
 package crowdsound
 

@@ -29,3 +29,8 @@ type SessionDataEvent struct {
 type TrendingArtistsEvent struct {
 	Artists []string `json:"artists"`
 }
+
+type SkipStatusEvent struct {
+	VotesToSkip int `json:"vote_to_skip"`
+	TotalUsers  int `json:"total_users"`
+}

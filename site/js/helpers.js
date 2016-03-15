@@ -10,12 +10,14 @@ function updateSessionInfo(info) {
     $("#stat-users").text(info.users);
 }
 
-function updateVoteProgress(votesToSkip) {
-    var totalUsers = parseInt($("#stat-users").text());
-    var progress = votesToSkip / totalUsers;
-
+function updateSkipStatus(voteCount, totalUsers) {
     // This works. Javascript!
-    $("#vote-skip-progress").width((progress / totalUsers) * 100 + '%')
+    var percentage = 0.0;
+    if (totalUsers > 0) {
+        percentage = (voteCount / totalUsers) * 100;
+    }
+
+    $("#skip-status-progress").width(percentage + '%')
 }
 
 function updateNowPlaying(track) {

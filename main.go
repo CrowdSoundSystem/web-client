@@ -4,11 +4,15 @@ import (
 	"bytes"
 	"encoding/json"
 	"flag"
-	"fmt"
 	"io"
 	"net/http"
+	"time"
 
+	"google.golang.org/grpc"
+
+	"github.com/crowdsoundsystem/web-client/pkg/crowdsound"
 	"github.com/crowdsoundsystem/web-client/pkg/event"
+	"golang.org/x/net/context"
 	"golang.org/x/net/websocket"
 )
 
@@ -35,8 +39,19 @@ func eventStreamHandler(ws *websocket.Conn) {
 	}
 }
 
-func handler(w http.ResponseWriter, req *http.Request) {
-	fmt.Fprintf(w, "Hello!")
+func skipHandler(w http.ResponseWriter, req *http.Request) {
+	conn, err := grpc.Dial(*endpoint, grpc.WithInsecure(), grpc.WithTimeout(5*time.Second))
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	client := crowdsound.NewAdminClient(conn)
+	_, err = client.Skip(context.Background(), &crowdsound.SkipRequest{})
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
 }
 
 func main() {
@@ -44,6 +59,7 @@ func main() {
 
 	eventStream = event.NewStream(*endpoint)
 
+	http.HandleFunc("/admin/skip", skipHandler)
 	http.Handle("/event_stream", websocket.Handler(eventStreamHandler))
 	http.Handle("/", http.FileServer(http.Dir("site/")))
 

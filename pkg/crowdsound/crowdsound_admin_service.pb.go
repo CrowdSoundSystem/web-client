@@ -2,18 +2,6 @@
 // source: pkg/crowdsound/crowdsound_admin_service.proto
 // DO NOT EDIT!
 
-/*
-Package crowdsound is a generated protocol buffer package.
-
-It is generated from these files:
-	pkg/crowdsound/crowdsound_admin_service.proto
-
-It has these top-level messages:
-	SkipStatusRequest
-	SkipStatusResponse
-	SkipRequest
-	SkipResponse
-*/
 package crowdsound
 
 import proto "github.com/golang/protobuf/proto"
@@ -30,17 +18,13 @@ var _ = proto.Marshal
 var _ = fmt.Errorf
 var _ = math.Inf
 
-// This is a compile-time assertion to ensure that this generated file
-// is compatible with the proto package it is being compiled against.
-const _ = proto.ProtoPackageIsVersion1
-
 type SkipStatusRequest struct {
 }
 
 func (m *SkipStatusRequest) Reset()                    { *m = SkipStatusRequest{} }
 func (m *SkipStatusRequest) String() string            { return proto.CompactTextString(m) }
 func (*SkipStatusRequest) ProtoMessage()               {}
-func (*SkipStatusRequest) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{0} }
+func (*SkipStatusRequest) Descriptor() ([]byte, []int) { return fileDescriptor1, []int{0} }
 
 type SkipStatusResponse struct {
 	VotesToSkip int32 `protobuf:"varint,1,opt,name=votes_to_skip" json:"votes_to_skip,omitempty"`
@@ -50,7 +34,7 @@ type SkipStatusResponse struct {
 func (m *SkipStatusResponse) Reset()                    { *m = SkipStatusResponse{} }
 func (m *SkipStatusResponse) String() string            { return proto.CompactTextString(m) }
 func (*SkipStatusResponse) ProtoMessage()               {}
-func (*SkipStatusResponse) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{1} }
+func (*SkipStatusResponse) Descriptor() ([]byte, []int) { return fileDescriptor1, []int{1} }
 
 type SkipRequest struct {
 }
@@ -58,7 +42,7 @@ type SkipRequest struct {
 func (m *SkipRequest) Reset()                    { *m = SkipRequest{} }
 func (m *SkipRequest) String() string            { return proto.CompactTextString(m) }
 func (*SkipRequest) ProtoMessage()               {}
-func (*SkipRequest) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{2} }
+func (*SkipRequest) Descriptor() ([]byte, []int) { return fileDescriptor1, []int{2} }
 
 type SkipResponse struct {
 }
@@ -66,7 +50,7 @@ type SkipResponse struct {
 func (m *SkipResponse) Reset()                    { *m = SkipResponse{} }
 func (m *SkipResponse) String() string            { return proto.CompactTextString(m) }
 func (*SkipResponse) ProtoMessage()               {}
-func (*SkipResponse) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{3} }
+func (*SkipResponse) Descriptor() ([]byte, []int) { return fileDescriptor1, []int{3} }
 
 func init() {
 	proto.RegisterType((*SkipStatusRequest)(nil), "CrowdSound.SkipStatusRequest")
@@ -163,7 +147,7 @@ var _Admin_serviceDesc = grpc.ServiceDesc{
 	Streams: []grpc.StreamDesc{},
 }
 
-var fileDescriptor0 = []byte{
+var fileDescriptor1 = []byte{
 	// 218 bytes of a gzipped FileDescriptorProto
 	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x09, 0x6e, 0x88, 0x02, 0xff, 0xe2, 0xd2, 0x2d, 0xc8, 0x4e, 0xd7,
 	0x4f, 0x2e, 0xca, 0x2f, 0x4f, 0x29, 0xce, 0x2f, 0xcd, 0x4b, 0x41, 0x62, 0xc6, 0x27, 0xa6, 0xe4,
