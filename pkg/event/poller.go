@@ -23,9 +23,10 @@ type Poller struct {
 
 func NewPoller(url string, options ...PollOption) (*Poller, error) {
 	config := pollerConfig{
-		queueInterval:       2 * time.Second,
-		nowPlayingInterval:  2 * time.Second,
-		sessionDataInterval: 5 * time.Second,
+		queueInterval:           2 * time.Second,
+		nowPlayingInterval:      2 * time.Second,
+		sessionDataInterval:     5 * time.Second,
+		trendingArtistsInterval: 5 * time.Second,
 	}
 
 	// Apply caller specified options
@@ -50,6 +51,7 @@ func NewPoller(url string, options ...PollOption) (*Poller, error) {
 	go poller.pollQueue()
 	go poller.pollNowPlaying()
 	go poller.pollSessionData()
+	go poller.pollTrendingArtists()
 
 	return poller, nil
 }
@@ -140,11 +142,45 @@ func (p *Poller) pollSessionData() {
 			}
 
 			p.eventChan <- EventData{
-				EventType: "sesssion_data",
+				EventType: "session_data",
 				Event: &SessionDataEvent{
 					SessionName: resp.SessionName,
 					Users:       int(resp.NumUsers),
 				},
+			}
+		}
+	}
+}
+
+func (p *Poller) pollTrendingArtists() {
+	for {
+		select {
+		case <-p.shutdown:
+			return
+		case <-time.After(p.config.trendingArtistsInterval):
+			stream, err := p.client.ListTrendingArtists(context.Background(), &crowdsound.ListTrendingArtistsRequest{})
+			if err != nil {
+				log.Println("Unable to retrieve trending artists:", err)
+				continue
+			}
+
+			event := &TrendingArtistsEvent{}
+
+			for {
+				resp, err := stream.Recv()
+				if err == io.EOF {
+					break
+				} else if err != nil {
+					log.Println("Unexpected error streaming trendingArtist:", err)
+					break
+				}
+
+				event.Artists = append(event.Artists, resp.Name)
+			}
+
+			p.eventChan <- EventData{
+				EventType: "trending_artists",
+				Event:     event,
 			}
 		}
 	}

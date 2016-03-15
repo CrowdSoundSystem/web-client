@@ -3,6 +3,7 @@ package main
 import (
 	"bytes"
 	"encoding/json"
+	"flag"
 	"fmt"
 	"io"
 	"net/http"
@@ -13,6 +14,8 @@ import (
 
 var (
 	eventStream *event.Stream
+
+	endpoint = flag.String("endpoint", "localhost:50051", "Crowdsound endpoint")
 )
 
 func eventStreamHandler(ws *websocket.Conn) {
@@ -37,7 +40,9 @@ func handler(w http.ResponseWriter, req *http.Request) {
 }
 
 func main() {
-	eventStream = event.NewStream("cs.ephyra.io:50051")
+	flag.Parse()
+
+	eventStream = event.NewStream(*endpoint)
 
 	http.Handle("/event_stream", websocket.Handler(eventStreamHandler))
 	http.Handle("/", http.FileServer(http.Dir("site/")))

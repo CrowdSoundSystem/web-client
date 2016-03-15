@@ -28,7 +28,8 @@ function updateTopArtists(artists) {
     // Clear existing items
     $("#trending-artists").find(".list-group-item").remove();
 
-    for (var i = 0; i < artists.length; i++) {
+    var max = Math.min(artists.length, 5)
+    for (var i = 0; i < max; i++) {
         $("#trending-artists").append(
                 $("<li>").text(artists[i]).attr("class", "list-group-item")
         );

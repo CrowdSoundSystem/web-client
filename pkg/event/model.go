@@ -25,3 +25,7 @@ type SessionDataEvent struct {
 	SessionName string `json:"sessionName"`
 	Users       int    `json:"users"`
 }
+
+type TrendingArtistsEvent struct {
+	Artists []string `json:"artists"`
+}

@@ -3,9 +3,10 @@ package event
 import "time"
 
 type pollerConfig struct {
-	queueInterval       time.Duration
-	nowPlayingInterval  time.Duration
-	sessionDataInterval time.Duration
+	queueInterval           time.Duration
+	nowPlayingInterval      time.Duration
+	sessionDataInterval     time.Duration
+	trendingArtistsInterval time.Duration
 }
 
 type PollOption func(*pollerConfig)
@@ -25,5 +26,11 @@ func WithNowPlayingInterval(i time.Duration) PollOption {
 func WithSessionDataInterval(i time.Duration) PollOption {
 	return func(p *pollerConfig) {
 		p.sessionDataInterval = i
+	}
+}
+
+func WithTrendingArtistsInterval(i time.Duration) PollOption {
+	return func(p *pollerConfig) {
+		p.trendingArtistsInterval = i
 	}
 }

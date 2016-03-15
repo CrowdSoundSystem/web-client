@@ -42,6 +42,8 @@ function onMessage(message) {
         case "session_data":
             updateSessionInfo(eventData.event)
             break;
+        case "trending_artists":
+            updateTopArtists(eventData.event.artists)
     }
 }
 
