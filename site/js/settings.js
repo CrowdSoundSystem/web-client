@@ -16,22 +16,24 @@ $(document).ready(function() {
     $.ajax({
         url:    "admin/setting",
         method: "GET",
-        sucess: function(response) {
-            $.each(response.settings, function(key, val) {
+        success: function(response) {
+            settings = JSON.parse(response);
+            console.log("settings:", settings);
+            $.each(settings, function(key, val) {
                 // For most things, we can just set it literally.
                 // For others, we need to do some stuff first
                 switch (key) {
-                    case "filterBuffered":
+                    case "filter_buffered":
                         if (val) {
                             val = "Enabled"
                         } else {
                             val = "Disabled"
                         }
                         break;
-                    case "inactivityThreshold":
+                    case "inactivity_threshold":
                         val = val + " minute(s)";
                         break;
-                    case "skipThreshold":
+                    case "skip_threshold":
                         val = 100 * val + "%";
                         break;
                 }
@@ -74,11 +76,11 @@ function createBooleanForm(label, enabled) {
     return form;
 }
 
-function postSetting(setting, value) {
+function postSetting(setting, type, value) {
     $.ajax({
         url:    "admin/setting",
         method: "POST",
-        data:   { key: setting, value: value },
+        data:   { key: setting, type: type, value: value },
         sucess: function(response) {
             // TODO: could do a badge, but fuck it, more things to do
             alert("Setting saved!");
@@ -123,33 +125,33 @@ $("#btn-save").click(function() {
 /***************************************
 * DB Settings                          *
 ****************************************/
-$("#filterBuffered").click(function() {
-    var enabled = $("#filterBuffered").text() == "Enabled";
+$("#filter_buffered").click(function() {
+    var enabled = $("#filter_buffered").text() == "Enabled";
     createModal("Filter Buffered", createBooleanForm("Enabled", enabled), function(val) {
-        postSetting("filterBuffered", val);
+        postSetting("filter_buffered", "bool", val);
 
         if (val) {
-            $("#filterBuffered").text("Enabled");
+            $("#filter_buffered").text("Enabled");
         } else {
-            $("#filterBuffered").text("Disabled");
+            $("#filter_buffered").text("Disabled");
         }
     });
 });
 
-$("#inactivityThreshold").click(function() {
-    var initial = $("#inactivityThreshold").text();
+$("#inactivity_threshold").click(function() {
+    var initial = $("#inactivity_threshold").text();
     initial = initial.split(" ")[0];
 
     createModal("Inactivity Threshold", createTextForm("Threshold (minutes)",integerPattern, initial), function(val) {
-        postSetting("inactivityThreshold", val * 60 * 1000);
-        $("#inactivityThreshold").text(val + " minute(s)");
+        postSetting("inactivity_threshold", "int", val * 60 * 1000);
+        $("#inactivity_threshold").text(val + " minute(s)");
     });
 });
 
-$("#resultLimit").click(function() {
-    createModal("Result Limit", createTextForm("Result Limit", nIntegerPattern, $("#resultLimit").text()), function(val) {
-        postSetting("resultLimit", val);
-        $("#resultLimit").text(val);
+$("#result_limit").click(function() {
+    createModal("Result Limit", createTextForm("Result Limit", nIntegerPattern, $("#result_limit").text()), function(val) {
+        postSetting("result_limit", "int", val);
+        $("#result_limit").text(val);
     });
 });
 
@@ -157,79 +159,79 @@ $("#resultLimit").click(function() {
 /***************************************
 * Qeueu Settings                       *
 ****************************************/
-$("#session-name").click(function() {
-    createModal("Session Name", createTextForm("Session Name", "^[a-zA-Z0-9]{1,20}$", $("#session-name").text()), function(val) {
-        postSetting("sessionName", val);
-        $("#session-name").text(val);
+$("#session_name").click(function() {
+    createModal("Session Name", createTextForm("Session Name", "^[a-zA-Z0-9]{1,20}$", $("#session_name").text()), function(val) {
+        postSetting("session_name", "string", val);
+        $("#session_name").text(val);
     });
 });
 
-$("#queueSize").click(function() {
-    createModal("Queue Size", createTextForm("Queue Size", integerPattern, $("#queueSize").text()), function(val) {
-        postSetting("queueSize", queueSize);
-        $("#queueSize").text(val);
+$("#queue_size").click(function() {
+    createModal("Queue Size", createTextForm("Queue Size", integerPattern, $("#queue_size").text()), function(val) {
+        postSetting("queue_size", "int", queue_size);
+        $("#queue_size").text(val);
     });
 });
 
-$("#trendingArtistsSize").click(function() {
-    createModal("Trending Artists Size", createTextForm("Trending Artists Size", integerPattern, $("#trendingArtistsSize").text()), function(val) {
-        postSetting("trendingArtistsSize", val);
-        $("#trendingArtistsSize").text(val);
+$("#trending_artists_size").click(function() {
+    createModal("Trending Artists Size", createTextForm("Trending Artists Size", integerPattern, $("#trending_artists_size").text()), function(val) {
+        postSetting("trending_artists_size", "int", val);
+        $("#trending_artists_size").text(val);
     });
 });
 
-$("#skipThreshold").click(function() {
-    createModal("Skip Threshold", createTextForm("Skip Threshold [0, 100]", percentagePattern, $("#skipThreshold").text()), function(val) {
-        postSetting("skipThreshold", val/100.0);
-        $("#skipThreshold").text(val + "%");
+$("#skip_threshold").click(function() {
+    createModal("Skip Threshold", createTextForm("Skip Threshold [0, 100]", percentagePattern, $("#skip_threshold").text()), function(val) {
+        postSetting("skip_threshold", "float", val/100.0);
+        $("#skip_threshold").text(val + "%");
     });
 });
 
 /***************************************
 * Algo Settings                        *
 ****************************************/
-$("#countWeight").click(function() {
-    createModal("Count Weight", createTextForm("Count Weight [0.0, 1.0]", multiplierPattern, $("#countWeight").text()), function(val) {
-        postSetting("countWeight", val);
-        $("#countWeight").text(val);
+$("#count_weight").click(function() {
+    createModal("Count Weight", createTextForm("Count Weight [0.0, 1.0]", multiplierPattern, $("#count_weight").text()), function(val) {
+        postSetting("count_weight", "float", val);
+        $("#count_weight").text(val);
     });
 });
 
-$("#voteWeight").click(function() {
-    createModal("Vote Weight", createTextForm("Vote Weight [0.0, 1.0]", multiplierPattern, $("#voteWeight").text()), function(val) {
-        postSetting("voteWeight", val);
-        $("#voteWeight").text(val);
+$("#vote_weight").click(function() {
+    createModal("Vote Weight", createTextForm("Vote Weight", multiplierPattern, $("#vote_weight").text()), function(val) {
+        postSetting("vote_weight", "int", val);
+        $("#vote_weight").text(val);
     });
 });
 
-$("#genreWeight").click(function() {
-    createModal("Genre Weight", createTextForm("Genre Weight [0.0, 1.0]", multiplierPattern, $("#genreWeight").text()), function(val) {
-        postSetting("genreWeight", val);
-        $("#genreWeight").text(val);
+$("#genre_weight").click(function() {
+    createModal("Genre Weight", createTextForm("Genre Weight [0.0, 1.0]", multiplierPattern, $("#genre_weight").text()), function(val) {
+        postSetting("genre_weight", "float", val);
+        $("#genre_weight").text(val);
     });
 });
 
-$("#artistWeight").click(function() {
-    createModal("Artist Weight", createTextForm("Artist Weight [0.0, 1.0]", multiplierPattern, $("#artistWeight").text()), function(val) {
-        postSetting("artistWeight", val);
-        $("#artistWeight").text(val);
+$("#artist_weight").click(function() {
+    createModal("Artist Weight", createTextForm("Artist Weight [0.0, 1.0]", multiplierPattern, $("#artist_weight").text()), function(val) {
+        postSetting("artist_weight", "float", val);
+        $("#artist_weight").text(val);
     });
 });
 
-$("#playedAgainMult").click(function() {
-    createModal("Played Again Multiplier", createTextForm("Played Again Multiplier [0.0, 1.0]", multiplierPattern, $("#playedAgainMult").text()), function(val) {
-        postSetting("playedAgainMultiplier", val);
-        $("#playedAgainMult").text(val);
+$("#played_again_mult").click(function() {
+    createModal("Played Again Multiplier", createTextForm("Played Again Multiplier [0.0, 1.0]", multiplierPattern, $("#played_again_mult").text()), function(val) {
+        postSetting("played_again_multiplier", "float", val);
+        $("#played_again_mult").text(val);
     });
 });
 
-$("#minRepeatWindow").click(function() {
-    var initial = $("#minRepeatWindow").text();
+$("#min_repeat_window").click(function() {
+    var initial = $("#min_repeat_window").text();
     initial = initial.split(" ")[0];
 
     createModal("Minimum Repeat Window", createTextForm("Minimum Repeat Window (Minutes)", integerPattern, initial), function(val) {
-        postSetting("minRepeatWindow", val);
-        $("#minRepeatWindow").text(val + " minute(s)");
+        postSetting("min_repeat_window", "int", val);
+        $("#min_repeat_window").text(val + " minute(s)");
     });
 });
 

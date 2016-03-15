@@ -7,6 +7,7 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"strconv"
 	"time"
 
 	"google.golang.org/grpc"
@@ -67,6 +68,57 @@ func settingHandler(w http.ResponseWriter, req *http.Request) {
 
 		serialized, _ := json.Marshal(s)
 		io.Copy(w, bytes.NewReader(serialized))
+	} else if req.Method == "POST" {
+		key := req.FormValue("key")
+		valType := req.FormValue("type")
+		val := req.FormValue("value")
+
+		if key == "" || valType == "" || val == "" {
+			http.Error(w, "", http.StatusBadRequest)
+			return
+		}
+
+		var err error
+
+		switch valType {
+		case "bool":
+			boolVal, err := strconv.ParseBool(val)
+			if err != nil {
+				http.Error(w, err.Error(), http.StatusBadRequest)
+				return
+			}
+
+			err = remoteSettings.SetBool(key, boolVal)
+			if err != nil {
+				log.Println("err: error")
+			}
+			break
+		case "int":
+			intVal, err := strconv.ParseInt(val, 10, 32)
+			if err != nil {
+				http.Error(w, err.Error(), http.StatusBadRequest)
+				return
+			}
+
+			err = remoteSettings.SetInt(key, int(intVal))
+			break
+		case "float":
+			floatVal, err := strconv.ParseFloat(val, 32)
+			if err != nil {
+				http.Error(w, err.Error(), http.StatusBadRequest)
+				return
+			}
+
+			err = remoteSettings.SetFloat(key, float32(floatVal))
+			break
+		case "string":
+			err = remoteSettings.SetString(key, val)
+			break
+		}
+
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+		}
 	}
 }
 
