@@ -4,7 +4,7 @@ Requires=crowdsound.service
 After=crowdsound.service
 
 [Service]
-ExecStart=/opt/webclient -config /etc/webclient/config.json
+ExecStart=/opt/crowdsound/webclient -config /etc/crowdsound/webclient_config.json
 
 [Install]
 WantedBy=multi-user.target
