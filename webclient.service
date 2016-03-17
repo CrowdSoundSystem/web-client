@@ -1,0 +1,11 @@
+[Unit]
+Description=Crowdsound Webclient
+Requires=crowdsound.service
+After=crowdsound.service
+
+[Service]
+ExecStart=/opt/webclient -config /etc/webclient/config.json
+
+[Install]
+WantedBy=multi-user.target
+

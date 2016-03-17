@@ -7,6 +7,7 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"os"
 	"strconv"
 	"time"
 
@@ -23,8 +24,10 @@ var (
 	eventStream    *event.Stream
 	remoteSettings *settings.Settings
 
+	configPath = flag.String("config", "", "Config path")
 	listenAddr = flag.String("listen", ":8080", "Listen address")
 	endpoint   = flag.String("endpoint", "localhost:50051", "Crowdsound endpoint")
+	dir        = flag.String("dir", "site/", "Directory of site files")
 )
 
 func eventStreamHandler(ws *websocket.Conn) {
@@ -159,12 +162,45 @@ func dbStatsHandler(w http.ResponseWriter, req *http.Request) {
 	io.Copy(w, bytes.NewReader(serialized))
 }
 
+type Config struct {
+	ListenAddr string `json:"listen_addr"`
+	Endpoint   string `json:"endpoint"`
+	Dir        string `json:"dir"`
+}
+
+func loadConfig() Config {
+	var config Config
+	if *configPath != "" {
+		f, err := os.Open(*configPath)
+		if err != nil {
+			log.Fatal(err)
+		}
+		defer f.Close()
+
+		d := json.NewDecoder(f)
+		err = d.Decode(&config)
+		if err != nil {
+			log.Fatal(err)
+		}
+	} else {
+		config = Config{
+			ListenAddr: *listenAddr,
+			Endpoint:   *endpoint,
+			Dir:        *dir,
+		}
+	}
+
+	return config
+}
+
 func main() {
 	flag.Parse()
 
+	config := loadConfig()
+
 	var err error
-	eventStream = event.NewStream(*endpoint)
-	remoteSettings, err = settings.NewSettings(*endpoint, 10*time.Second)
+	eventStream = event.NewStream(config.Endpoint)
+	remoteSettings, err = settings.NewSettings(config.Endpoint, 10*time.Second)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -174,7 +210,8 @@ func main() {
 	http.HandleFunc("/admin/version", versionHandler)
 	http.HandleFunc("/admin/db_stats", dbStatsHandler)
 	http.Handle("/event_stream", websocket.Handler(eventStreamHandler))
-	http.Handle("/", http.FileServer(http.Dir("site/")))
+	http.Handle("/", http.FileServer(http.Dir(config.Dir)))
 
-	panic(http.ListenAndServe(*listenAddr, nil))
+	log.Println("Listening on: ", config.ListenAddr)
+	panic(http.ListenAndServe(config.ListenAddr, nil))
 }
