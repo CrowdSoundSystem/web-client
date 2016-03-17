@@ -5,6 +5,7 @@ After=crowdsound.service
 
 [Service]
 ExecStart=/opt/crowdsound/webclient -config /etc/crowdsound/webclient_config.json
+TimeoutStartSec=infinity
 
 [Install]
 WantedBy=multi-user.target
